@@ -1,0 +1,18 @@
+{
+    "name": "MarchingCubesEditor",
+    "rootNamespace": "Syulleh.MarchingCubes",
+    "references": [
+        "GUID:0c1d2e9056854ad46ba203ac6b553977"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
