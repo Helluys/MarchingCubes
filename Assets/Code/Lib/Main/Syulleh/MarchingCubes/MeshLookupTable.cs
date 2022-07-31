@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 
-using Vector3i = Syulleh.Math.Vector3<int>;
-using Vector3f = Syulleh.Math.Vector3<float>;
+using Vector3f = System.Numerics.Vector3;
 using System.Linq;
 using System;
 
@@ -47,91 +46,91 @@ namespace Syulleh.MarchingCubes {
 		/// </summary>
 		private static IEnumerable<CubeMesh> BaseCubes () => new List<CubeMesh>() {
 			// 0
-			new CubeMesh(new int[]{}, new int[]{}, new Vector3i[]{}),
+			new CubeMesh(new int[]{}, new int[]{}, new (int x, int y, int z)[]{}),
 			// 1
 			new CubeMesh(new int[]{1},
 						 new int[]{1, 4, 9},
-						 new Vector3i[]{new Vector3i(1, 4, 9)}),
+						 new (int x, int y, int z)[]{(1, 4, 9)}),
 			// 2
 			new CubeMesh(new int[]{1, 2},
 						 new int[]{2, 4, 9, 10},
-						 new Vector3i[]{new Vector3i(2, 4, 9),
-										new Vector3i(2, 9, 10)}),
+						 new (int x, int y, int z)[]{(2, 4, 9),
+													 (2, 9, 10)}),
 			// 3
 			new CubeMesh(new int[]{1, 3},
 						 new int[]{1, 2, 3, 4, 9, 12},
-						 new Vector3i[]{new Vector3i(1, 4, 9),
-										new Vector3i(2, 12, 3)}),
+						 new (int x, int y, int z)[]{(1, 4, 9),
+													 (2, 12, 3)}),
 			// 4
 			new CubeMesh(new int[]{1, 7},
 						 new int[]{1, 4, 6, 7, 9, 12},
-						 new Vector3i[]{new Vector3i(1, 4, 9),
-										new Vector3i(6, 7, 12)}),
+						 new (int x, int y, int z)[]{(1, 4, 9),
+													 (6, 7, 12)}),
 			// 5
 			new CubeMesh(new int[]{2, 5, 6},
 						 new int[]{1, 2, 6, 8, 9},
-						 new Vector3i[]{new Vector3i(1, 9, 2),
-										new Vector3i(2, 9, 8),
-										new Vector3i(2, 8, 6)}),
+						 new (int x, int y, int z)[]{(1, 9, 2),
+													 (2, 9, 8),
+													 (2, 8, 6)}),
 			// 6
 			new CubeMesh(new int[]{1, 2, 7},
 						 new int[]{2, 4, 6, 7, 9, 10, 12},
-						 new Vector3i[]{new Vector3i(2, 4, 9),
-										new Vector3i(2, 9, 10),
-										new Vector3i(6, 7, 12)}),
+						 new (int x, int y, int z)[]{(2, 4, 9),
+													 (2, 9, 10),
+													 (6, 7, 12)}),
 			// 7
 			new CubeMesh(new int[]{2, 4, 7},
 						 new int[] {1, 2, 3, 4, 6, 7, 10, 11, 12},
-						 new Vector3i[]{new Vector3i(1, 10, 2),
-										new Vector3i(4, 3, 11),
-										new Vector3i(6, 7, 12)}),
+						 new (int x, int y, int z)[]{(1, 10, 2),
+													 (4, 3, 11),
+													 (6, 7, 12)}),
 			// 8
 			new CubeMesh(new int[]{1, 2, 5, 6},
 						 new int[] {2, 4, 6, 8},
-						 new Vector3i[]{new Vector3i(2, 4, 6),
-										new Vector3i(4, 8, 6)}),
+						 new (int x, int y, int z)[]{(2, 4, 6),
+													 (4, 8, 6)}),
 			// 9
 			new CubeMesh(new int[] {1, 5, 6, 8},
 						 new int[] {1, 4, 6, 7, 10, 11},
-						 new Vector3i[]{new Vector3i(1, 6, 10),
-										new Vector3i(1, 7, 6),
-										new Vector3i(1, 4, 7),
-										new Vector3i(4, 11, 7)}),
+						 new (int x, int y, int z)[]{(1, 6, 10),
+													 (1, 7, 6),
+													 (1, 4, 7),
+													 (4, 11, 7)}),
 			// 10
 			new CubeMesh(new int[] {1, 4, 6, 7},
 						 new int[] {1, 3, 5, 7, 9, 10, 11, 12},
-						 new Vector3i[]{new Vector3i(1, 3, 9),
-										new Vector3i(3, 11, 9),
-										new Vector3i(5, 12, 10),
-										new Vector3i(5, 7, 12)}),
+						 new (int x, int y, int z)[]{(1, 3, 9),
+													 (3, 11, 9),
+													 (5, 12, 10),
+													 (5, 7, 12)}),
 			// 11
 			new CubeMesh(new int[]{1, 5, 6, 7},
 						 new int[] {1, 4, 7, 8, 10, 12},
-						 new Vector3i[]{new Vector3i(1, 4, 8),
-										new Vector3i(1, 8, 12),
-										new Vector3i(1, 12, 10),
-										new Vector3i(8, 7, 12)}),
+						 new (int x, int y, int z)[]{(1, 4, 8),
+													 (1, 8, 12),
+													 (1, 12, 10),
+													 (8, 7, 12)}),
 			// 12
 			new CubeMesh(new int[]{2, 4, 5, 6},
 						 new int[] {1, 2, 3, 4, 6, 8, 9, 11},
-						 new Vector3i[]{new Vector3i(1, 9, 2),
-										new Vector3i(2, 9, 8),
-										new Vector3i(2, 8, 6),
-										new Vector3i(3, 11, 4)}),
+						 new (int x, int y, int z)[]{(1, 9, 2),
+													 (2, 9, 8),
+													 (2, 8, 6),
+													 (3, 11, 4)}),
 			// 13
 			new CubeMesh(new int[]{1, 3, 6, 8},
 						 new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
-						 new Vector3i[]{new Vector3i(1, 4, 9),
-										new Vector3i(5, 6, 10),
-										new Vector3i(3, 2, 12),
-										new Vector3i(7, 8, 11)}),
+						 new (int x, int y, int z)[]{(1, 4, 9),
+													 (5, 6, 10),
+													 (3, 2, 12),
+													 (7, 8, 11)}),
 			// 14
 			new CubeMesh(new int[]{2, 5, 6, 8},
 						 new int[]{1, 2, 6, 7, 9, 11},
-						 new Vector3i[]{new Vector3i(1, 9, 11),
-										new Vector3i(1, 11, 6),
-										new Vector3i(1, 6, 2),
-										new Vector3i(6, 11, 7)})
+						 new (int x, int y, int z)[]{(1, 9, 11),
+													 (1, 11, 6),
+													 (1, 6, 2),
+													 (6, 11, 7)})
 		};
 
 		/// <summary>

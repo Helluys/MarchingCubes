@@ -1,10 +1,10 @@
 {
-    "name": "Test",
+    "name": "MarchingCubesLibTest",
     "rootNamespace": "",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "MarchingCubes"
+        "MarchingCubesLib"
     ],
     "includePlatforms": [
         "Editor"

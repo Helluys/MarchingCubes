@@ -23,7 +23,7 @@ namespace Syulleh.MarchingCubes {
 					// Compute vertex coordinates
 					vertices = cube.PopulatedEdges
 						.Select(i => edgeToPos[i])
-						.Select(v => new Vector3(v.x, v.y, v.z))
+						.Select(v => new Vector3(v.X, v.Y, v.Z))
 						.ToArray(),
 
 					// Map triangle array to vertex index instead of value

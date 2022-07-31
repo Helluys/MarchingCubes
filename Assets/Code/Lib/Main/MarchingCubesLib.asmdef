@@ -1,5 +1,5 @@
 {
-    "name": "MarchingCubes",
+    "name": "MarchingCubesLib",
     "rootNamespace": "Syulleh.MarchingCubes",
     "references": [],
     "includePlatforms": [],
@@ -10,5 +10,5 @@
     "autoReferenced": false,
     "defineConstraints": [],
     "versionDefines": [],
-    "noEngineReferences": false
+    "noEngineReferences": true
 }

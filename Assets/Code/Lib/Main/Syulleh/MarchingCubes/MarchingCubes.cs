@@ -4,8 +4,7 @@ using System.Linq;
 
 using Syulleh.Math;
 using Field3Df = Syulleh.Math.Field3D<float>;
-using Vector3f = Syulleh.Math.Vector3<float>;
-using Vector3u = Syulleh.Math.Vector3<uint>;
+using System.Numerics;
 
 namespace Syulleh.MarchingCubes
 {
@@ -14,9 +13,9 @@ namespace Syulleh.MarchingCubes
 		private readonly struct EdgeVertex
 		{
 			public bool Present { get; }
-			public Vector3f? Position { get; }
+			public Vector3? Position { get; }
 
-			public EdgeVertex(bool present, Vector3f? position)
+			public EdgeVertex(bool present, Vector3? position)
 			{
 				Present = present;
 				Position = position;
@@ -27,7 +26,7 @@ namespace Syulleh.MarchingCubes
 		private static EdgeVertex GetEdgeVertex(Field3Df.FieldValue? a, Field3Df.FieldValue? b)
 		{
 			return (a != null && b != null && Sign(a.Value) != Sign(b.Value))
-				? new EdgeVertex(true, new Vector3f((a.X + b.X) / 2f,
+				? new EdgeVertex(true, new Vector3((a.X + b.X) / 2f,
 													(a.Y + b.Y) / 2f,
 													(a.Z + b.Z) / 2f))
 				: new EdgeVertex(false, null);
@@ -36,11 +35,10 @@ namespace Syulleh.MarchingCubes
 
 		public static Mesh Compute(Field3Df field)
 		{
-			List<Vector3f> vertices = new();
-			List<Vector3u> triangles = new();
+			List<Vector3> vertices = new();
+			List<(uint x, uint y, uint z)> triangles = new();
 
-			Field3D<EdgeVertex[]> edgeVertices = field.Map((x, y, z, here) => new EdgeVertex[12]
-			{
+			Field3D<EdgeVertex[]> edgeVertices = field.Map((x, y, z, here) => new EdgeVertex[12] {
 				GetEdgeVertex(here, here?.Right),
 				GetEdgeVertex(here?.Right, here?.Right?.Top),
 				GetEdgeVertex(here?.Right?.Top, here?.Top),
