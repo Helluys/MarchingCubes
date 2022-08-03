@@ -1,55 +1,43 @@
-using UnityMesh = UnityEngine.Mesh;
+using System;
+using System.Linq;
+
+using Syulleh.MarchingCubes.Unity;
 
 using UnityEditor;
-using static Syulleh.MarchingCubes.MeshLookupTable;
-using System.Linq;
-using System;
+
 using UnityEngine;
+
+using static Syulleh.MarchingCubes.MeshLookupTable;
+
+using UnityMesh = UnityEngine.Mesh;
 
 namespace Syulleh.MarchingCubes {
 	public class MarchingCubesWizard : ScriptableWizard {
+		public float threshold;
 		public Material material;
+		public Field3D field;
 
-		[MenuItem("Syulleh/Marching Cubes")]
+		[MenuItem("Syulleh/Marching Cubes - for real")]
 		static void DisplayMCWizard () {
-			DisplayWizard<MarchingCubesWizard>("Marching Cubes");
+			DisplayWizard<MarchingCubesWizard>("Marching  Cubes");
 		}
 
 		private void OnWizardCreate () {
-			Debug.Log("Generating " + allCubes.Count() + " cubes...");
-			int i = 0;
-			foreach (CubeMesh cube in allCubes) {
-				UnityMesh uMesh = new() {
-					// Compute vertex coordinates
-					vertices = cube.PopulatedEdges
-						.Select(i => edgeToPos[i])
-						.Select(v => new Vector3(v.X, v.Y, v.Z))
-						.ToArray(),
+			Debug.Log("Generating " + configurations.Count() + " cubes...");
+			Mesh mesh = MarchingCubes.Compute(field.Field, threshold);
 
-					// Map triangle array to vertex index instead of value
-					triangles = cube.Triangles
-						.Select(t => new int[] {
-							Array.FindIndex(cube.PopulatedEdges, i => i == t.x),
-							Array.FindIndex(cube.PopulatedEdges, i => i == t.y),
-							Array.FindIndex(cube.PopulatedEdges, i => i == t.z)})
-						.SelectMany(tri => tri)
-						.ToArray()
-				};
+			Debug.Log(String.Join(", ", mesh.vertices));
+			Debug.Log(String.Join(", ", mesh.triangles));
 
-				// Instantiate game object with mesh and renderer
-				GameObject go = new("Base cube [" + string.Join(",", cube.PopulatedVertices) + "] : [" + string.Join(",", cube.PopulatedEdges) + "]");
-				go.AddComponent<MeshFilter>().mesh = uMesh;
-				go.AddComponent<MeshRenderer>().material = material;
+			UnityMesh uMesh = new() {
+				vertices = mesh.vertices.Select(v => new Vector3(v.X, v.Y, v.Z)).ToArray(),
+				triangles = mesh.triangles
+			};
 
-				// Arrange in space
-				go.transform.position = new Vector3((i % 14) * 2, -(i / 14) * 2, 0);
-				i++;
-
-				// Add a unit box collider to see unit coordinates in editor
-				BoxCollider boxCollider = go.AddComponent<BoxCollider>();
-				boxCollider.size = Vector3.one;
-				boxCollider.center = 0.5f * Vector3.one;
-			}
+			// Instantiate game object with mesh and renderer
+			GameObject go = new("Marching cubes!");
+			go.AddComponent<MeshFilter>().mesh = uMesh;
+			go.AddComponent<MeshRenderer>().material = material;
 
 			Debug.Log("Done");
 		}

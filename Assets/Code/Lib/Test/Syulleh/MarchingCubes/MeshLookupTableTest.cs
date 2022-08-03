@@ -27,25 +27,8 @@ namespace Syulleh.MarchingCubes {
 			[Values(false, true)] bool v6,
 			[Values(false, true)] bool v7,
 			[Values(false, true)] bool v8) {
-			List<int> vertices = new();
-			if (v1)
-				vertices.Add(1);
-			if (v2)
-				vertices.Add(2);
-			if (v3)
-				vertices.Add(3);
-			if (v4)
-				vertices.Add(4);
-			if (v5)
-				vertices.Add(5);
-			if (v6)
-				vertices.Add(6);
-			if (v7)
-				vertices.Add(7);
-			if (v8)
-				vertices.Add(8);
-
-			Assert.AreEqual(1, MeshLookupTable.allCubes.Where(c => c.PopulatedVertices.SequenceEqual(vertices)).Count());
+			
+			Assert.IsNotNull(MeshLookupTable.configurations[(v1, v2, v3, v4, v5, v6, v7, v8)]);
 		}
 	}
 }

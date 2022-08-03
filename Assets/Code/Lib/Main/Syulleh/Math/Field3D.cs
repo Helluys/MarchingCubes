@@ -1,27 +1,35 @@
 using System;
+using System.Runtime.Serialization;
 
 namespace Syulleh.Math {
 	/// <summary>
 	/// A generic 3D field.
 	/// </summary>
 	/// <typeparam name="T">the field value type</typeparam>
-	[Serializable]
 	public class Field3D<T> {
 		/// <summary>
 		/// A handle to a field value that allows navigating its neighbour values.
 		/// </summary>
 		public class FieldValue {
 			private readonly Field3D<T> field;
-			private readonly (uint x, uint y, uint z) coordinates;
+			private readonly (int x, int y, int z) coordinates;
 
-			public FieldValue (Field3D<T> field, uint x, uint y, uint z) {
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="field"></param>
+			/// <param name="x"></param>
+			/// <param name="y"></param>
+			/// <param name="z"></param>
+			public FieldValue (Field3D<T> field, int x, int y, int z) {
 				this.field = field;
 				coordinates = (x, y, z);
 			}
 
-			public uint X => coordinates.x;
-			public uint Y => coordinates.y;
-			public uint Z => coordinates.z;
+			public (int x, int y, int z) Coordinates => coordinates;
+			public int X => coordinates.x;
+			public int Y => coordinates.y;
+			public int Z => coordinates.z;
 
 #nullable enable
 			public T Value => field[coordinates];
@@ -32,56 +40,95 @@ namespace Syulleh.Math {
 			public FieldValue? Top => GetOrDefault(coordinates.x, coordinates.y, coordinates.z + 1);
 			public FieldValue? Bottom => GetOrDefault(coordinates.x, coordinates.y, coordinates.z - 1);
 
-			private FieldValue? GetOrDefault (uint x, uint y, uint z) =>
-				(x < 0 || x >= field.size.x || y < 0 || y >= field.size.y || z < 0 || z >= field.size.z)
+			private FieldValue? GetOrDefault (int x, int y, int z) =>
+				(x < 0 || x >= field.Size.x || y < 0 || y >= field.Size.y || z < 0 || z >= field.Size.z)
 					? default : new FieldValue(field, x, y, z);
 #nullable disable
 		}
 
 		public delegate void Action (T value);
-		public delegate T Evaluator (uint x, uint y, uint z);
-		public delegate U Mapper<U> (uint x, uint y, uint z, FieldValue value);
+		public delegate T Evaluator (int x, int y, int z);
+		public delegate U Mapper<U> (FieldValue value);
 
-		public readonly (uint x, uint y, uint z) size;
-		private readonly T[,,] field;
+		private readonly T[,,] values;
 
-		public T this[uint x, uint y, uint z] {
-			get { return field[x, y, z]; }
-			set { field[x, y, z] = value; }
+		/// <summary>
+		/// The size of the field. Values are indexed in [0; Size-1] on each coordinate.
+		/// </summary>
+		public (int x, int y, int z) Size => (values.GetLength(0), values.GetLength(1), values.GetLength(2));
+
+		/// <summary>
+		/// Accessor for a value indexed by natural coordinates.
+		/// </summary>
+		/// <param name="x">the X coordinate</param>
+		/// <param name="y">the Y coordinate</param>
+		/// <param name="z">the Z coordinate</param>
+		/// <returns>the value of the field at location (x,y,z)</returns>
+		public T this[int x, int y, int z] {
+			get { return values[x, y, z]; }
+			set { values[x, y, z] = value; }
 		}
 
-		public T this[(uint x, uint y, uint z) c] {
-			get { return field[c.x, c.y, c.z]; }
-			set { field[c.x, c.y, c.z] = value; }
+		/// <summary>
+		/// Accessor for a value indexed by triplet of natural coordinates.
+		/// </summary>
+		/// <param name="x">the X coordinate</param>
+		/// <param name="y">the Y coordinate</param>
+		/// <param name="z">the Z coordinate</param>
+		/// <returns>the value of the field at location (x,y,z)</returns>
+		public T this[(int x, int y, int z) c] {
+			get { return values[c.x, c.y, c.z]; }
+			set { values[c.x, c.y, c.z] = value; }
 		}
 
-		public Field3D (uint sizeX, uint sizeY, uint sizeZ, Evaluator evaluator)
+		/// <summary>
+		/// Constructs a field by evaluating a function in each point.
+		/// </summary>
+		/// <param name="sizeX">the field X size</param>
+		/// <param name="sizeY">the field Y size</param>
+		/// <param name="sizeZ">the field Z size</param>
+		/// <param name="evaluator">the field evaluation function</param>
+		public Field3D (int sizeX, int sizeY, int sizeZ, Evaluator evaluator)
 			: this((sizeX, sizeY, sizeZ), evaluator) { }
 
-		public Field3D ((uint x, uint y, uint z) size, Evaluator evaluator) {
-			this.size = size;
-			this.field = new T[size.x, size.y, size.z];
-			for (uint x = 0; x < size.x; x++) {
-				for (uint y = 0; y < size.y; y++) {
-					for (uint z = 0; z < size.z; z++) {
-						field[x, y, z] = evaluator(x, y, z);
+		/// <summary>
+		/// Constructs a field by evaluating a function in each point.
+		/// </summary>
+		/// <param name="size">the field size</param>
+		/// <param name="evaluator">the field evaluation function</param>
+		public Field3D ((int x, int y, int z) size, Evaluator evaluator) {
+			values = new T[size.x, size.y, size.z];
+			for (int x = 0; x < size.x; x++) {
+				for (int y = 0; y < size.y; y++) {
+					for (int z = 0; z < size.z; z++) {
+						values[x, y, z] = evaluator(x, y, z);
 					}
 				}
 			}
 		}
 
+		/// <summary>
+		/// Applies the given action for each field value.
+		/// </summary>
+		/// <param name="action">the action</param>
+		public void ForEach (Action<FieldValue> action) {
+			for (int x = 0; x < Size.x; x++) {
+				for (int y = 0; y < Size.y; y++) {
+					for (int z = 0; z < Size.z; z++) {
+						action(new FieldValue(this, x, y, z));
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Returns a field of which values are the result of the <paramref name="mapper"/> function applied on this field values.
+		/// </summary>
+		/// <typeparam name="U">the return field type</typeparam>
+		/// <param name="mapper">the field value mapping function</param>
+		/// <returns>the mapped field</returns>
 		public Field3D<U> Map<U> (Mapper<U> mapper) {
-			return new Field3D<U>(size.x, size.y, size.z, (x, y, z) => mapper(x, y, z, new FieldValue(this, x, y, z)));
-		}
-
-		public void ForEach (Action action) {
-			for (uint x = 0; x < size.x; x++) {
-				for (uint y = 0; y < size.y; y++) {
-					for (uint z = 0; z < size.z; z++) {
-						action(field[x, y, z]);
-					}
-				}
-			}
+			return new Field3D<U>(Size.x, Size.y, Size.z, (x, y, z) => mapper(new FieldValue(this, x, y, z)));
 		}
 	}
 }

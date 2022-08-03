@@ -18,8 +18,8 @@ namespace Syulleh.MarchingCubes {
 			Debug.Log("Generating " + size + " 3D field...");
 
 			new GameObject("Field 3D").AddComponent<Field3D>().Field =
-				new Field3D<float>((uint) size.x, (uint) size.y, (uint) size.z,
-					(x, y, z) => Perlin.Noise(x + origin.x + .5f, y + origin.y + .5f, z + origin.z + .5f));
+				new Field3D<float>(size.x, size.y, size.z,
+					(x, y, z) => .5f * ((size.y - y) / (float) size.y) * (.8f + Perlin.Noise(x + origin.x + .5f, y + origin.y + .5f, z + origin.z + .5f)));
 			Debug.Log("Done");
 		}
 	}

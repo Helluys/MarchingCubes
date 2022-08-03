@@ -29,9 +29,20 @@ namespace Syulleh.MarchingCubes {
 		};
 
 		/// <summary>
-		/// All 256 cube configurations.
+		/// All 256 cube configurations, indexed by vertex presence. The vertices are ordered as per
+		/// <see href="https://academy.cba.mit.edu/classes/scanning_printing/MarchingCubes.pdf">MIT paper</see>,
+		/// from 1 to 8.
 		/// </summary>
-		public static readonly IEnumerable<CubeMesh> allCubes = GenerateCubes();
+		public static readonly IDictionary<(bool, bool, bool, bool, bool, bool, bool, bool), CubeMesh> configurations =
+			GenerateCubes().ToDictionary(c => (
+				c.PopulatedVertices.Contains(1),
+				c.PopulatedVertices.Contains(2),
+				c.PopulatedVertices.Contains(3),
+				c.PopulatedVertices.Contains(4),
+				c.PopulatedVertices.Contains(5),
+				c.PopulatedVertices.Contains(6),
+				c.PopulatedVertices.Contains(7),
+				c.PopulatedVertices.Contains(8)));
 
 		/// <summary>
 		/// Generates all 256 cube configurations.
