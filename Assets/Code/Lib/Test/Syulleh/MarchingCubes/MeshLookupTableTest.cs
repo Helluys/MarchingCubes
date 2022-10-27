@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -5,6 +6,23 @@ using NUnit.Framework;
 
 namespace Syulleh.MarchingCubes {
 	public class MeshLookupTableTest {
+		/// <summary>
+		/// Maps vertex index pair to edge index.
+		/// </summary>
+		private static readonly IDictionary<(int, int), int> vertToEdge = new Dictionary<(int, int), int>() {
+			{(1,2), 1},
+			{(2,3), 2},
+			{(3,4), 3},
+			{(1,4), 4},
+			{(5,6), 5},
+			{(6,7), 6},
+			{(7,8), 7},
+			{(5,8), 8},
+			{(1,5), 9},
+			{(2,6), 10},
+			{(4,8), 11},
+			{(3,7), 12},
+		};
 
 		/// <summary>
 		/// Asserts that the vertex presence combination is present exactly once in <see cref="MeshLookupTable.allCubes"/>.
@@ -27,8 +45,25 @@ namespace Syulleh.MarchingCubes {
 			[Values(false, true)] bool v6,
 			[Values(false, true)] bool v7,
 			[Values(false, true)] bool v8) {
-			
-			Assert.IsNotNull(MeshLookupTable.configurations[(v1, v2, v3, v4, v5, v6, v7, v8)]);
+			CubeMesh cubeMesh = MeshLookupTable.configurations[(v1, v2, v3, v4, v5, v6, v7, v8)];
+
+			Assert.IsNotNull(cubeMesh);
+			AssertEdgePresence(cubeMesh);
+		}
+
+		/// <summary>
+		/// Asserts edge presence is consistent with vertice presence.
+		/// </summary>
+		/// <param name="cubeMesh">the cube mesh under test</param>
+		private static void AssertEdgePresence (CubeMesh cubeMesh) {
+			for (int i1 = 1; i1 <= 7; i1++) {
+				for (int i2 = i1 + 1; i2 <= 8; i2++) {
+					if (vertToEdge.ContainsKey((i1, i2))) {
+						bool intersection = cubeMesh.PopulatedVertices.Contains(i1) != cubeMesh.PopulatedVertices.Contains(i2);
+						Assert.AreEqual(intersection, cubeMesh.PopulatedEdges.Contains(vertToEdge[(i1, i2)]));
+					}
+				}
+			}
 		}
 	}
 }

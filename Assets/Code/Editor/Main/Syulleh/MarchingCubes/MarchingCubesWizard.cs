@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 
 using Syulleh.MarchingCubes.Unity;
@@ -19,20 +18,22 @@ namespace Syulleh.MarchingCubes {
 
 		[MenuItem("Syulleh/Marching Cubes - for real")]
 		static void DisplayMCWizard () {
-			DisplayWizard<MarchingCubesWizard>("Marching  Cubes");
+			DisplayWizard<MarchingCubesWizard>("Marching Cubes");
 		}
 
 		private void OnWizardCreate () {
 			Debug.Log("Generating " + configurations.Count() + " cubes...");
 			Mesh mesh = MarchingCubes.Compute(field.Field, threshold);
 
-			Debug.Log(String.Join(", ", mesh.vertices));
-			Debug.Log(String.Join(", ", mesh.triangles));
+			Debug.Log(string.Join(", ", mesh.vertices));
+			Debug.Log(string.Join(", ", mesh.triangles));
 
 			UnityMesh uMesh = new() {
 				vertices = mesh.vertices.Select(v => new Vector3(v.X, v.Y, v.Z)).ToArray(),
 				triangles = mesh.triangles
 			};
+			uMesh.RecalculateNormals();
+			uMesh.RecalculateBounds();
 
 			// Instantiate game object with mesh and renderer
 			GameObject go = new("Marching cubes!");

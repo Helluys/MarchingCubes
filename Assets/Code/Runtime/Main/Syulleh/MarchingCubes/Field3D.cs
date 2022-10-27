@@ -18,8 +18,8 @@ namespace Syulleh.MarchingCubes.Unity {
 			for (int x = 0; x < Field.Size.x; x++) {
 				for (int y = 0; y < Field.Size.y; y++) {
 					for (int z = 0; z < Field.Size.z; z++) {
-						Gizmos.color = Field[x, y, z] > 0 ? Color.green : Color.red;
-						Gizmos.DrawSphere(transform.TransformPoint(new Vector3(x, y, z)), Field[x, y, z]);
+						Gizmos.color = Field[x, y, z] * Color.green + (1 - Field[x, y, z]) * Color.red;
+						Gizmos.DrawSphere(transform.TransformPoint(new Vector3(x, y, z)), .1f);
 					}
 				}
 			}
