@@ -21,7 +21,7 @@ namespace Syulleh.MarchingCubes {
 			List<Vector3> vertices = new();
 			List<(int x, int y, int z)> triangles = new();
 
-			field.MapSmall(v => GetCube(v, threshold))
+			field.Map(v => GetCube(v, threshold))
 				.ForEach(cube => {
 					int offset = vertices.Count;
 					vertices.AddRange(cube.Value.cubeMesh.PopulatedEdges

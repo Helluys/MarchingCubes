@@ -128,16 +128,6 @@ namespace Syulleh.Math {
 			return new Field3D<U>(Size.x, Size.y, Size.z, (x, y, z) => mapper(new FieldValue(this, x, y, z)));
 		}
 
-		/// <summary>
-		/// Returns a field of which values are the result of the <paramref name="mapper"/> function applied on this field values.
-		/// </summary>
-		/// <typeparam name="U">the return field type</typeparam>
-		/// <param name="mapper">the field value mapping function</param>
-		/// <returns>the mapped field</returns>
-		public Field3D<U> MapSmall<U> (Mapper<U> mapper) {
-			return new Field3D<U>(Size.x-1, Size.y, Size.z-1, (x, y, z) => mapper(new FieldValue(this, x, y, z)));
-		}
-
 		public bool Contains ((int x, int y, int z) coordinates) => Contains(coordinates.x, coordinates.y, coordinates.z);
 		public bool Contains (int x, int y, int z) =>
 				(x >= 0 && x < Size.x && y >= 0 && y < Size.y && z >= 0 && z < Size.z);

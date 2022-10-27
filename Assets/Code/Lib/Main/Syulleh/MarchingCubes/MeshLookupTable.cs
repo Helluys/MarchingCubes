@@ -3,6 +3,7 @@
 using Vector3f = System.Numerics.Vector3;
 using System.Linq;
 using System;
+using System.Diagnostics;
 
 namespace Syulleh.MarchingCubes {
 	/// <summary>
@@ -49,111 +50,173 @@ namespace Syulleh.MarchingCubes {
 		/// </summary>
 		/// <returns>all 256 cube configurations</returns>
 		private static IEnumerable<CubeMesh> GenerateCubes () =>
-			ApplySymmetries(BaseCubes());
+			ApplySymmetries(BaseCubes);
 
 		/// <summary>
-		/// All basic cube patterns as per <see href="https://academy.cba.mit.edu/classes/scanning_printing/MarchingCubes.pdf">MIT paper</see> figures 3 and 4.
-		/// Edge index are those of the paper, including in the triangle structure.
+		/// All basic cube patterns as per <see href="https://transvoxel.org/Lengyel-VoxelTerrain.pdf">Lengyel paper</see> table 3.2.
+		/// Edge indices are those of the <see href="https://academy.cba.mit.edu/classes/scanning_printing/MarchingCubes.pdf">original MIT paper</see> figures 4.
 		/// </summary>
-		private static IEnumerable<CubeMesh> BaseCubes () => new List<CubeMesh>() {
+		private static IList<CubeMesh> BaseCubes => new List<CubeMesh>() {
 			// 0
-			new CubeMesh(new int[]{}, new int[]{}, new (int x, int y, int z)[]{}),
+			new CubeMesh(new int[] {}, new int[] {}, new (int x, int y, int z)[] {}),
 			// 1
-			new CubeMesh(new int[]{1},
-						 new int[]{1, 4, 9},
-						 new (int x, int y, int z)[]{(1, 4, 9)}),
+			new CubeMesh(new int[] {1},
+						 new int[] {1, 4, 9},
+						 new (int x, int y, int z)[] {(1, 4, 9)}),
 			// 2
-			new CubeMesh(new int[]{1, 2},
-						 new int[]{2, 4, 9, 10},
-						 new (int x, int y, int z)[]{(2, 4, 9),
-													 (2, 9, 10)}),
-			// 3
-			new CubeMesh(new int[]{1, 3},
-						 new int[]{1, 2, 3, 4, 9, 12},
-						 new (int x, int y, int z)[]{(1, 4, 9),
+			new CubeMesh(new int[] {1, 3},
+						 new int[] {1, 2, 3, 4, 9, 12},
+						 new (int x, int y, int z)[] {(1, 4, 9),
 													 (2, 12, 3)}),
+			// 3
+			new CubeMesh(new int[] {1, 5},
+						 new int[] {1, 4, 5, 8},
+						 new (int x, int y, int z)[] {(1, 4, 8),
+													 (1, 8, 5)}),
 			// 4
-			new CubeMesh(new int[]{1, 7},
-						 new int[]{1, 4, 6, 7, 9, 12},
-						 new (int x, int y, int z)[]{(1, 4, 9),
+			new CubeMesh(new int[] {1, 7},
+						 new int[] {1, 4, 6, 7, 9, 12},
+						 new (int x, int y, int z)[] {(1, 4, 9),
 													 (6, 7, 12)}),
 			// 5
-			new CubeMesh(new int[]{2, 5, 6},
-						 new int[]{1, 2, 6, 8, 9},
-						 new (int x, int y, int z)[]{(1, 9, 2),
-													 (2, 9, 8),
-													 (2, 8, 6)}),
+			new CubeMesh(new int[] {1, 2, 6},
+						 new int[] {2, 4, 5, 6, 9},
+						 new (int x, int y, int z)[] {(2, 4, 6),
+													 (6, 4, 9),
+													 (6, 9, 5)}),
 			// 6
-			new CubeMesh(new int[]{1, 2, 7},
-						 new int[]{2, 4, 6, 7, 9, 10, 12},
-						 new (int x, int y, int z)[]{(2, 4, 9),
-													 (2, 9, 10),
-													 (6, 7, 12)}),
+			new CubeMesh(new int[] {1, 3, 5},
+						 new int[] {1, 2, 3, 4, 5, 8, 12},
+						 new (int x, int y, int z)[] {(1, 4, 8),
+													 (1, 8, 5),
+													 (2, 12, 3)}),
 			// 7
-			new CubeMesh(new int[]{2, 4, 7},
-						 new int[] {1, 2, 3, 4, 6, 7, 10, 11, 12},
-						 new (int x, int y, int z)[]{(1, 10, 2),
-													 (4, 3, 11),
-													 (6, 7, 12)}),
-			// 8
-			new CubeMesh(new int[]{1, 2, 5, 6},
-						 new int[] {2, 4, 6, 8},
-						 new (int x, int y, int z)[]{(2, 4, 6),
-													 (4, 8, 6)}),
-			// 9
-			new CubeMesh(new int[] {1, 5, 6, 8},
-						 new int[] {1, 4, 6, 7, 10, 11},
-						 new (int x, int y, int z)[]{(1, 6, 10),
-													 (1, 7, 6),
-													 (1, 4, 7),
-													 (4, 11, 7)}),
-			// 10
-			new CubeMesh(new int[] {1, 4, 6, 7},
-						 new int[] {1, 3, 5, 7, 9, 10, 11, 12},
-						 new (int x, int y, int z)[]{(1, 3, 9),
-													 (3, 11, 9),
-													 (5, 12, 10),
-													 (5, 7, 12)}),
-			// 11
-			new CubeMesh(new int[]{1, 5, 6, 7},
-						 new int[] {1, 4, 7, 8, 10, 12},
-						 new (int x, int y, int z)[]{(1, 4, 8),
-													 (1, 8, 12),
-													 (1, 12, 10),
-													 (8, 7, 12)}),
-			// 12
-			new CubeMesh(new int[]{2, 4, 5, 6},
-						 new int[] {1, 2, 3, 4, 6, 8, 9, 11},
-						 new (int x, int y, int z)[]{(1, 9, 2),
-													 (2, 9, 8),
-													 (2, 8, 6),
-													 (3, 11, 4)}),
-			// 13
-			new CubeMesh(new int[]{1, 3, 6, 8},
-						 new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
-						 new (int x, int y, int z)[]{(1, 4, 9),
-													 (5, 6, 10),
-													 (3, 2, 12),
+			new CubeMesh(new int[] {1, 3, 8},
+						 new int[] {1, 2, 3, 4, 7, 8, 9, 11, 12},
+						 new (int x, int y, int z)[] {(1, 4, 9),
+													 (2, 12, 3),
 													 (7, 8, 11)}),
+			// 8
+			new CubeMesh(new int[] {1, 2, 6, 8},
+						 new int[] {2, 4, 5, 6, 7, 8, 9, 11},
+						 new (int x, int y, int z)[] {(2, 4, 6),
+													 (6, 4, 9),
+													 (6, 9, 5),
+													 (7, 8, 11)}),
+			// 9
+			new CubeMesh(new int[] {1, 3, 5, 7},
+						 new int[] {1, 2, 3, 4, 5, 6, 7, 8},
+						 new (int x, int y, int z)[] {(1, 4, 8),
+													 (1, 8, 5),
+													 (2, 3, 7),
+													 (2, 7, 6)}),
+			// 10
+			new CubeMesh(new int[] {1, 3, 6, 8},
+						 new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
+						 new (int x, int y, int z)[] {(1, 4, 9),
+													 (2, 12, 3),
+													 (7, 8, 11),
+													 (5, 6, 10)}),
+			// 11
+			new CubeMesh(new int[] {1, 2, 5, 6},
+						 new int[] {2, 4, 6, 8},
+						 new (int x, int y, int z)[] {(2, 4, 8),
+													 (2, 8, 6)}),
+			// 12
+			new CubeMesh(new int[] {1, 2, 4, 6},
+						 new int[] {2, 3, 5, 6, 9, 11},
+						 new (int x, int y, int z)[] {(2, 3, 6),
+													 (6, 3, 11),
+													 (6, 11, 5),
+													 (5, 11, 9)}),
+			// 13
+			new CubeMesh(new int[] {1, 2, 3, 5},
+						 new int[] {3, 4, 5, 8, 10, 12},
+						 new (int x, int y, int z)[] {(4, 8, 3),
+													 (8, 12, 3),
+													 (8, 5, 12),
+													 (5, 10, 12)}),
 			// 14
-			new CubeMesh(new int[]{2, 5, 6, 8},
-						 new int[]{1, 2, 6, 7, 9, 11},
-						 new (int x, int y, int z)[]{(1, 9, 11),
-													 (1, 11, 6),
-													 (1, 6, 2),
-													 (6, 11, 7)})
+			new CubeMesh(new int[] {1, 2, 3, 6},
+						 new int[] {3, 4, 5, 6, 9, 12},
+						 new (int x, int y, int z)[] {(4, 9, 3),
+													 (9, 12, 3),
+													 (9, 5, 12),
+													 (5, 6, 12)}),
+			// 15
+			new CubeMesh(new int[] {1, 2, 3, 4, 6, 8},
+						 new int[] {5, 6, 7, 8, 9, 12},
+						 new (int x, int y, int z)[] {(8, 9, 7),
+													 (9, 12, 7),
+													 (9, 6, 12),
+													 (9, 5, 6)}),
+			// 16
+			new CubeMesh(new int[] {1, 2, 4, 6, 8},
+						 new int[] {2, 3, 5, 6, 7, 8, 9},
+						 new (int x, int y, int z)[] {(8, 9, 7),
+													 (9, 3, 7),
+													 (9, 2, 3),
+													 (9, 6, 2),
+													 (9, 5, 6)}),
+			// 17
+			new CubeMesh(new int[] {1, 2, 3, 6, 8},
+						 new int[] {3, 4, 5, 6, 7, 8, 9, 11, 12},
+						 new (int x, int y, int z)[] {(4, 9, 3),
+													 (9, 12, 3),
+													 (9, 5, 12),
+													 (5, 6, 12),
+													 (7, 8, 11)})
 		};
 
 		/// <summary>
-		/// Applies rotational and reversal symmetries to the provided cubes to create more configurations.
+		/// The aambiguous cube configurations. 
+		/// </summary>
+		private static IList<int> AmbiguousCubes => new List<int>() { 2, 6, 7 };
+
+		/// <summary>
+		/// Applies rotational and reversal symmetries to the provided cubes to create equivalent configurations.<br />
+		/// As per <see href="https://transvoxel.org/Lengyel-VoxelTerrain.pdf">Lengyel paper</see> paragraph 3.2, all
+		/// configurations except #2, #6 and #7 should have the inversion symmetry applied.
 		/// </summary>
 		/// <param name="cubeMeshes">the base cube configurations</param>
 		/// <returns>the generated configurations</returns>
-		private static List<CubeMesh> ApplySymmetries (IEnumerable<CubeMesh> cubeMeshes) =>
-			cubeMeshes
-				.SelectMany(c => new CubeMesh[] { c, c.Reverse() })
-				// All rotations of a cube: https://math.stackexchange.com/a/1419644
-				.SelectMany(c => new CubeMesh[] {
+		private static List<CubeMesh> ApplySymmetries (IEnumerable<CubeMesh> cubeMeshes) {
+			return cubeMeshes.SelectMany(ApplyInversion)
+							 .SelectMany(ApplyRotations)
+							 .Distinct()
+							 .ToList();
+		}
+
+		/// <summary>
+		/// Applies inverse symmetry to the provided cube to create equivalent configurations.<br />
+		/// As per <see href="https://transvoxel.org/Lengyel-VoxelTerrain.pdf">Lengyel paper</see> paragraph 3.2, all
+		/// configurations except #2, #6 and #7 should have the inversion symmetry applied.
+		/// </summary>
+		/// <param name="c">the base cube configuration</param>
+		/// <returns>the set of equivalent cube configurations obtained from inverse symmetries</returns>
+		private static IEnumerable<CubeMesh> ApplyInversion (CubeMesh c) {
+			return IsAmbiguous(c) ? new CubeMesh[] { c } : new CubeMesh[] { c, c.Reverse() };
+		}
+
+		/// <summary>
+		/// Determines whether the provided base cube configuration is ambiguous or not.
+		/// </summary>
+		/// <param name="c">the base cube configuration</param>
+		/// <returns>whether the provided base cube configuration is ambiguous or not</returns>
+		private static bool IsAmbiguous (CubeMesh c) {
+			Console.WriteLine("ambiguous " + AmbiguousCubes);
+			Console.WriteLine("c " + c);
+			return AmbiguousCubes.Contains(BaseCubes.IndexOf(c));
+		}
+
+		/// <summary>
+		/// Applies rotational symmetries to the provided cube to create equivalent configurations.
+		/// </summary>
+		/// <param name="c">the base cube configuration</param>
+		/// <returns>the set of equivalent cube configurations obtained from rotational symmetries</returns>
+		private static IEnumerable<CubeMesh> ApplyRotations (CubeMesh c) {
+			// All rotations of a cube: https://math.stackexchange.com/a/1419644
+			return new CubeMesh[] {
 					// Identity
 					c,																				
 					// X
@@ -239,8 +302,7 @@ namespace Syulleh.MarchingCubes {
 						.Map(RotateVertexY, RotateEdgeY)
 						.Map(RotateVertexY, RotateEdgeY)
 						.Map(RotateVertexY, RotateEdgeY)
-				})
-				.Distinct()
-				.ToList();
+				};
+		}
 	}
 }
