@@ -31,19 +31,16 @@ namespace Syulleh.Math {
 			public int Y => coordinates.y;
 			public int Z => coordinates.z;
 
-#nullable enable
 			public T Value => field[coordinates];
-			public FieldValue? Right => GetOrDefault(coordinates.x + 1, coordinates.y, coordinates.z);
-			public FieldValue? Left => GetOrDefault(coordinates.x - 1, coordinates.y, coordinates.z);
-			public FieldValue? Back => GetOrDefault(coordinates.x, coordinates.y + 1, coordinates.z);
-			public FieldValue? Front => GetOrDefault(coordinates.x, coordinates.y - 1, coordinates.z);
-			public FieldValue? Top => GetOrDefault(coordinates.x, coordinates.y, coordinates.z + 1);
-			public FieldValue? Bottom => GetOrDefault(coordinates.x, coordinates.y, coordinates.z - 1);
+			public FieldValue Right => new(field, coordinates.x + 1, coordinates.y, coordinates.z);
+			public FieldValue Left => new(field, coordinates.x - 1, coordinates.y, coordinates.z);
+			public FieldValue Back => new(field, coordinates.x, coordinates.y + 1, coordinates.z);
+			public FieldValue Front => new(field, coordinates.x, coordinates.y - 1, coordinates.z);
+			public FieldValue Top => new(field, coordinates.x, coordinates.y, coordinates.z + 1);
+			public FieldValue Bottom => new(field, coordinates.x, coordinates.y, coordinates.z - 1);
 
-			private FieldValue? GetOrDefault (int x, int y, int z) =>
-				(x < 0 || x >= field.Size.x || y < 0 || y >= field.Size.y || z < 0 || z >= field.Size.z)
-					? default : new FieldValue(field, x, y, z);
-#nullable disable
+			public T SafeValue => ValueOr(default);
+			public T ValueOr(T def) => field.Contains(coordinates) ? field[coordinates] : def;
 		}
 
 		public delegate void Action (T value);
@@ -130,5 +127,19 @@ namespace Syulleh.Math {
 		public Field3D<U> Map<U> (Mapper<U> mapper) {
 			return new Field3D<U>(Size.x, Size.y, Size.z, (x, y, z) => mapper(new FieldValue(this, x, y, z)));
 		}
+
+		/// <summary>
+		/// Returns a field of which values are the result of the <paramref name="mapper"/> function applied on this field values.
+		/// </summary>
+		/// <typeparam name="U">the return field type</typeparam>
+		/// <param name="mapper">the field value mapping function</param>
+		/// <returns>the mapped field</returns>
+		public Field3D<U> MapSmall<U> (Mapper<U> mapper) {
+			return new Field3D<U>(Size.x-1, Size.y, Size.z-1, (x, y, z) => mapper(new FieldValue(this, x, y, z)));
+		}
+
+		public bool Contains ((int x, int y, int z) coordinates) => Contains(coordinates.x, coordinates.y, coordinates.z);
+		public bool Contains (int x, int y, int z) =>
+				(x >= 0 && x < Size.x && y >= 0 && y < Size.y && z >= 0 && z < Size.z);
 	}
 }

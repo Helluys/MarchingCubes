@@ -21,11 +21,11 @@ namespace Syulleh.MarchingCubes {
 			List<Vector3> vertices = new();
 			List<(int x, int y, int z)> triangles = new();
 
-			field.Map(v => GetCube(v, v => v != null && v >= threshold))
+			field.MapSmall(v => GetCube(v, threshold))
 				.ForEach(cube => {
 					int offset = vertices.Count;
 					vertices.AddRange(cube.Value.cubeMesh.PopulatedEdges
-						.Select(i => PlaceVertex(i, cube.Value.fieldValue)));
+						.Select(i => PlaceVertex(i, cube.Value.fieldValue, threshold)));
 					triangles.AddRange(cube.Value.cubeMesh.Triangles
 						.Select(t => (
 							Array.FindIndex(cube.Value.cubeMesh.PopulatedEdges, i => i == t.x) + offset,
@@ -38,53 +38,45 @@ namespace Syulleh.MarchingCubes {
 			return new Mesh(vertices.ToArray(), triangles.SelectMany(v => new[] { v.x, v.y, v.z }).ToArray());
 		}
 
-#nullable enable
-		private static Cube GetCube (Field3Df.FieldValue? value, Func<float?, bool> presenceFunc) {
+		private static Cube GetCube (Field3Df.FieldValue value, float threshold) {
+			bool presenceFunc (float f) => f >= threshold;
+
 			(bool, bool, bool, bool, bool, bool, bool, bool) presence =
-				(presenceFunc(value?.Value),
-				presenceFunc(value?.Right?.Value),
-				presenceFunc(value?.Right?.Top?.Value),
-				presenceFunc(value?.Top?.Value),
-				presenceFunc(value?.Front?.Value),
-				presenceFunc(value?.Front?.Right?.Value),
-				presenceFunc(value?.Front?.Right?.Top?.Value),
-				presenceFunc(value?.Front?.Top?.Value));
+				(presenceFunc(value.SafeValue),
+				presenceFunc(value.Right.SafeValue),
+				presenceFunc(value.Right.Top.SafeValue),
+				presenceFunc(value.Top.SafeValue),
+				presenceFunc(value.Front.SafeValue),
+				presenceFunc(value.Front.Right.SafeValue),
+				presenceFunc(value.Front.Right.Top.SafeValue),
+				presenceFunc(value.Front.Top.SafeValue));
+
 			return new Cube(MeshLookupTable.configurations[presence], value);
 		}
-#nullable disable
 
-		static Vector3 PlaceVertex (int edgeIndex, Field3Df.FieldValue fieldValue) =>
+		static Vector3 PlaceVertex (int edgeIndex, Field3Df.FieldValue fieldValue, float threshold) =>
 			edgeIndex switch {
-				1 => LerpVertex(fieldValue, fieldValue.Right),
-				2 => LerpVertex(fieldValue.Right, fieldValue.Right?.Top),
-				3 => LerpVertex(fieldValue.Right?.Top, fieldValue.Top),
-				4 => LerpVertex(fieldValue, fieldValue.Top),
-				5 => LerpVertex(fieldValue.Front, fieldValue.Front?.Right),
-				6 => LerpVertex(fieldValue.Front?.Right, fieldValue.Front?.Right?.Top),
-				7 => LerpVertex(fieldValue.Front?.Top, fieldValue.Front?.Right?.Top),
-				8 => LerpVertex(fieldValue.Front, fieldValue.Front?.Top),
-				9 => LerpVertex(fieldValue, fieldValue.Front),
-				10 => LerpVertex(fieldValue.Right, fieldValue.Right?.Front),
-				11 => LerpVertex(fieldValue.Top, fieldValue.Top?.Front),
-				12 => LerpVertex(fieldValue.Top?.Right, fieldValue.Top?.Right?.Front),
+				1 => LerpVertex(fieldValue, fieldValue.Right, threshold),
+				2 => LerpVertex(fieldValue.Right, fieldValue.Right.Top, threshold),
+				3 => LerpVertex(fieldValue.Right.Top, fieldValue.Top, threshold),
+				4 => LerpVertex(fieldValue, fieldValue.Top, threshold),
+				5 => LerpVertex(fieldValue.Front, fieldValue.Front.Right, threshold),
+				6 => LerpVertex(fieldValue.Front.Right, fieldValue.Front.Right.Top, threshold),
+				7 => LerpVertex(fieldValue.Front.Top, fieldValue.Front.Right.Top, threshold),
+				8 => LerpVertex(fieldValue.Front, fieldValue.Front.Top, threshold),
+				9 => LerpVertex(fieldValue, fieldValue.Front, threshold),
+				10 => LerpVertex(fieldValue.Right, fieldValue.Right.Front, threshold),
+				11 => LerpVertex(fieldValue.Top, fieldValue.Top.Front, threshold),
+				12 => LerpVertex(fieldValue.Top.Right, fieldValue.Top.Right.Front, threshold),
 				_ => throw new ArgumentException("Invalid edge index " + edgeIndex)
 			};
 
-#nullable enable
-		private static Vector3 LerpVertex (Field3Df.FieldValue? a, Field3Df.FieldValue? b) {
-			// a or b must be present
-			float aValue = a?.Value ?? b.Value;
-			float bValue = b?.Value ?? a.Value;
-			float aWeight = (aValue + bValue != 0) ? aValue / (aValue + bValue) : 0.5f;
+		private static Vector3 LerpVertex (Field3Df.FieldValue a, Field3Df.FieldValue b, float threshold) {
+			float x = a.SafeValue + b.SafeValue != 0 ? (threshold - a.SafeValue) / (b.SafeValue - a.SafeValue) : 0.5f;
 
-			Vector3 aPos = (a != null) ? new Vector3(a.X, a.Y, a.Z) : new Vector3(b.X, b.Y, b.Z);
-			Vector3 bPos = (b != null) ? new Vector3(b.X, b.Y, b.Z) : new Vector3(a.X, a.Y, a.Z);
-
-			return aWeight * aPos + (1f - aWeight) * bPos;
+			Vector3 aPos = new(a.X, a.Y, a.Z);
+			Vector3 bPos = new(b.X, b.Y, b.Z);
+			return aPos + x * (bPos - aPos);
 		}
-#nullable disable
-
-		private static Func<(int, int, int), (int, int, int)> AddTriplet (int increment) =>
-			x => (x.Item1 + increment, x.Item2 + increment, x.Item3 + increment);
 	}
 }
