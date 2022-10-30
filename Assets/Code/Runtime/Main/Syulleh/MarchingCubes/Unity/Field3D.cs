@@ -11,6 +11,7 @@ namespace Syulleh.MarchingCubes.Unity {
 		private Field3D<float> field;
 		public Field3D<float> Field { get => field; set => field = value; }
 
+		#region debugging
 		private void OnDrawGizmosSelected () {
 			if (Field == null)
 				return;
@@ -24,6 +25,7 @@ namespace Syulleh.MarchingCubes.Unity {
 				}
 			}
 		}
+		#endregion debugging
 
 		#region serialization
 		[Serializable]

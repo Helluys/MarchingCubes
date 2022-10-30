@@ -17,7 +17,7 @@ namespace Syulleh.MarchingCubes {
 			}
 		}
 
-		public static Mesh Compute (Field3Df field, float threshold) {
+		public static MeshData Compute (Field3Df field, float threshold) {
 			List<Vector3> vertices = new();
 			List<(int x, int y, int z)> triangles = new();
 
@@ -35,7 +35,7 @@ namespace Syulleh.MarchingCubes {
 				});
 
 			// flatten triangles list to a unique array
-			return new Mesh(vertices.ToArray(), triangles.SelectMany(v => new[] { v.x, v.y, v.z }).ToArray());
+			return new MeshData(vertices.ToArray(), triangles.SelectMany(v => new[] { v.x, v.y, v.z }).ToArray());
 		}
 
 		private static Cube GetCube (Field3Df.FieldValue value, float threshold) {
